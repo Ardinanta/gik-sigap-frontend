@@ -1,13 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRight, CalendarDays, CheckCircle2, Lightbulb, ListChecks, LoaderCircle, Search } from 'lucide-react'
+import { ArrowRight, CalendarDays, CheckCircle2, Lightbulb, ListChecks, LoaderCircle, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { Link } from 'react-router-dom'
+import { ConfirmDialog } from '../../../components/ConfirmDialog'
+import { UnsavedChangesDialog } from '../../../components/UnsavedChangesDialog'
 import { getApiError } from '../../../lib/utils'
 import { FormAlert, SelectField, SubmitButton, TextField } from '../../auth/components/FormControls'
-import { useBuyerDemands, useBuyerLocations, useCreateBuyerDemand, useFishSizes } from '../hooks/useBuyerDemands'
+import { useBuyerDemands, useBuyerLocations, useCreateBuyerDemand, useDeleteBuyerDemand, useFishSizes } from '../hooks/useBuyerDemands'
 import { buyerDemandSchema, type BuyerDemandFormOutput, type BuyerDemandFormValues } from '../schemas/buyerDemandSchema'
-import type { FishSize } from '../types/buyerDemand.types'
+import type { BuyerDemand, FishSize } from '../types/buyerDemand.types'
 
 function localDateValue(date = new Date()) {
   const offset = date.getTimezoneOffset() * 60_000
@@ -34,13 +36,17 @@ export function BuyerDemandsPage() {
   const [page, setPage] = useState(1)
   const [formMessage, setFormMessage] = useState('')
   const [formError, setFormError] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState<BuyerDemand | null>(null)
+  const [deleteMessage, setDeleteMessage] = useState('')
+  const [deleteError, setDeleteError] = useState('')
   const demands = useBuyerDemands(page)
   const fishSizes = useFishSizes()
   const locations = useBuyerLocations()
   const createDemand = useCreateBuyerDemand()
+  const deleteDemand = useDeleteBuyerDemand()
   const today = localDateValue()
 
-  const { register, handleSubmit, control, reset, setError, formState: { errors } } = useForm<BuyerDemandFormValues, unknown, BuyerDemandFormOutput>({
+  const { register, handleSubmit, control, reset, setError, formState: { errors, isDirty } } = useForm<BuyerDemandFormValues, unknown, BuyerDemandFormOutput>({
     resolver: zodResolver(buyerDemandSchema),
     defaultValues: {
       fish_size_id: 0,
@@ -84,6 +90,26 @@ export function BuyerDemandsPage() {
       if (Object.keys(apiError.errors).length === 0) setFormError(apiError.message)
     }
   })
+
+  const openDeleteDialog = (demand: BuyerDemand) => {
+    setDeleteMessage('')
+    setDeleteError('')
+    setDeleteTarget(demand)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+
+    try {
+      const response = await deleteDemand.mutateAsync(deleteTarget.id)
+      const shouldMoveToPreviousPage = page > 1 && demands.data?.data.length === 1
+      setDeleteTarget(null)
+      setDeleteMessage(response.message)
+      if (shouldMoveToPreviousPage) setPage((current) => current - 1)
+    } catch (error) {
+      setDeleteError(getApiError(error, 'Kebutuhan belum dapat dihapus. Silakan coba lagi.').message)
+    }
+  }
 
   return (
     <div className="buyer-page buyer-demands-page">
@@ -153,16 +179,33 @@ export function BuyerDemandsPage() {
             {demands.data && <span>{demands.data.meta.total} catatan</span>}
           </div>
 
+          {deleteMessage && <div className="mb-3 rounded-lg bg-success-soft p-3 text-xs text-success" role="status">{deleteMessage}</div>}
           {demands.isLoading && <div className="buyer-demand-state"><LoaderCircle className="spinner" size={20} /> Memuat kebutuhan...</div>}
           {demands.isError && <div className="buyer-demand-state error">Data gagal dimuat. <button className="text-button" type="button" onClick={() => demands.refetch()}>Coba lagi</button></div>}
           {demands.data?.data.length === 0 && <div className="buyer-demand-state">Belum ada kebutuhan aktif. Isi form untuk membuat catatan pertama.</div>}
 
           <div className="buyer-demand-list">
-            {demands.data?.data.map((demand) => (
-              <article className="buyer-demand-card" key={demand.id}>
+            {demands.data?.data.map((demand) => {
+              const deletingThisDemand = deleteDemand.isPending && deleteTarget?.id === demand.id
+              const deleteLabel = `Hapus kebutuhan Bandeng ${demand.fish_size.name} ${formatVolume(demand.required_volume_kg)} kg`
+
+              return (
+                <article className="buyer-demand-card" key={demand.id}>
                 <div className="buyer-demand-card-header">
                   <div><h3>Bandeng {demand.fish_size.name}</h3><span>{demand.fish_size.code === 'small' ? 'Ukuran kecil' : demand.fish_size.code === 'medium' ? 'Ukuran sedang' : 'Ukuran besar'}</span></div>
-                  <span className="buyer-demand-status"><i aria-hidden="true" /> Aktif</span>
+                  <div className="buyer-demand-card-actions">
+                    <span className="buyer-demand-status"><i aria-hidden="true" /> Aktif</span>
+                    <button
+                      className="buyer-demand-delete"
+                      type="button"
+                      title={deleteLabel}
+                      aria-label={deleteLabel}
+                      disabled={deleteDemand.isPending}
+                      onClick={() => openDeleteDialog(demand)}
+                    >
+                      {deletingThisDemand ? <LoaderCircle className="spinner" size={17} /> : <Trash2 size={17} />}
+                    </button>
+                  </div>
                 </div>
                 <dl>
                   <div><dt>Volume Kebutuhan</dt><dd>{formatVolume(demand.required_volume_kg)} kg</dd></div>
@@ -173,8 +216,9 @@ export function BuyerDemandsPage() {
                 <Link className="buyer-recommendation-link" to={`/app/buyer/rekomendasi?demand=${demand.id}`}>
                   <Search size={16} /> Lihat Rekomendasi <ArrowRight size={16} />
                 </Link>
-              </article>
-            ))}
+                </article>
+              )
+            })}
           </div>
 
           {demands.data && demands.data.meta.last_page > 1 && (
@@ -191,6 +235,21 @@ export function BuyerDemandsPage() {
           </div>
         </aside>
       </div>
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Hapus kebutuhan ini?"
+        description={deleteTarget ? <>Kebutuhan <strong className="text-ink">Bandeng {deleteTarget.fish_size.name} sebanyak {formatVolume(deleteTarget.required_volume_kg)} kg</strong> akan dihapus dari daftar aktif. Rekomendasi terkait juga tidak akan aktif lagi.</> : ''}
+        confirmLabel="Ya, Hapus"
+        variant="danger"
+        pending={deleteDemand.isPending}
+        error={deleteError || undefined}
+        onCancel={() => {
+          setDeleteTarget(null)
+          setDeleteError('')
+        }}
+        onConfirm={confirmDelete}
+      />
+      <UnsavedChangesDialog when={isDirty && !createDemand.isPending && !formMessage && deleteTarget === null} />
     </div>
   )
 }

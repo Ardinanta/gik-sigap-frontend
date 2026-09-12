@@ -9,7 +9,5 @@ export function reservationSchema(maximumVolume: number) {
   })
 }
 
-export type ReservationFormValues = {
-  volume_kg: number
-  notes: string
-}
+export type ReservationFormValues = z.input<ReturnType<typeof reservationSchema>>
+export type ReservationFormOutput = z.output<ReturnType<typeof reservationSchema>>

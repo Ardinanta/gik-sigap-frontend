@@ -3,6 +3,7 @@ import { CheckCircle2, LockKeyhole, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useSearchParams } from 'react-router-dom'
+import { UnsavedChangesDialog } from '../../../components/UnsavedChangesDialog'
 import { getApiError } from '../../../lib/utils'
 import { authApi } from '../api/authApi'
 import { AuthLayout } from '../components/AuthLayout'
@@ -17,7 +18,7 @@ export function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [formError, setFormError] = useState('')
-  const { register, handleSubmit, setError, formState: { errors } } = useForm<ResetPasswordFormValues>({ resolver: zodResolver(resetPasswordSchema) })
+  const { register, handleSubmit, setError, formState: { errors, isDirty } } = useForm<ResetPasswordFormValues>({ resolver: zodResolver(resetPasswordSchema) })
 
   const onSubmit = handleSubmit(async (values) => {
     if (!validLink) return
@@ -53,6 +54,7 @@ export function ResetPasswordPage() {
           <SubmitButton loading={loading}>Simpan kata sandi baru</SubmitButton>
         </form>
       )}
+      <UnsavedChangesDialog when={validLink && isDirty && !loading && !success} />
     </AuthLayout>
   )
 }

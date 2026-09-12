@@ -1,5 +1,7 @@
 import { LoaderCircle, LogOut, MapPin, ShieldCheck } from 'lucide-react'
+import { useState } from 'react'
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { ForgotPasswordPage, LoginPage, RegisterPage, ResetPasswordPage } from '../features/auth'
 import { AuthLayout } from '../features/auth/components/AuthLayout'
 import { useCurrentUser, useLogout } from '../features/auth/hooks/useAuth'
@@ -47,6 +49,7 @@ function HomeRedirect() {
 function AppLanding() {
   const user = useCurrentUser()
   const logout = useLogout()
+  const [logoutOpen, setLogoutOpen] = useState(false)
 
   if (user.data?.roles.includes('buyer')) {
     return <Navigate to="/app/buyer/dashboard" replace />
@@ -64,11 +67,22 @@ function AppLanding() {
         </div>
         <p>Dashboard khusus peran ini belum tersedia. Sesi autentikasi Anda tetap aktif dan aman.</p>
         {logout.isError && <p className="field-error">Tidak dapat keluar. Silakan coba lagi.</p>}
-        <button className="button-secondary" type="button" onClick={() => logout.mutate()} disabled={logout.isPending}>
+        <button className="button-secondary" type="button" onClick={() => setLogoutOpen(true)} disabled={logout.isPending}>
           {logout.isPending ? <LoaderCircle className="spinner" size={17} /> : <LogOut size={17} />}
           Keluar
         </button>
       </div>
+      <ConfirmDialog
+        open={logoutOpen}
+        title="Keluar dari SIGAP?"
+        description="Sesi akun Anda pada perangkat ini akan diakhiri. Anda perlu masuk kembali untuk mengakses layanan SIGAP."
+        confirmLabel="Ya, Keluar"
+        variant="danger"
+        pending={logout.isPending}
+        error={logout.isError ? 'Tidak dapat keluar. Periksa koneksi lalu coba lagi.' : undefined}
+        onCancel={() => setLogoutOpen(false)}
+        onConfirm={() => logout.mutate(undefined, { onSuccess: () => setLogoutOpen(false) })}
+      />
     </AuthLayout>
   )
 }
@@ -92,7 +106,7 @@ export default function App() {
             <Route path="dashboard" element={<BuyerDashboardPage />} />
             <Route path="kebutuhan" element={<BuyerDemandsPage />} />
             <Route path="pasokan" element={<BuyerSupplyPage />} />
-            <Route path="pasokan/:harvestPlanId" element={<BuyerSupplyDetailPage />} />
+            <Route path="pasokan/:harvestPlanId" element={<BuyerSupplyDetailPage key="supply-detail" />} />
             <Route path="rekomendasi" element={<BuyerRecommendationsPage />} />
             <Route path="kemitraan" element={<BuyerPartnershipsPage />} />
             <Route path="profil" element={<BuyerProfilePage />} />

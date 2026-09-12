@@ -3,6 +3,7 @@ import { LockKeyhole, Mail, Phone, ShoppingBasket, User, UserPlus, Waves } from 
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
+import { UnsavedChangesDialog } from '../../../components/UnsavedChangesDialog'
 import { getApiError } from '../../../lib/utils'
 import { AuthLayout } from '../components/AuthLayout'
 import { FormAlert, PasswordField, SelectField, SubmitButton, TextField } from '../components/FormControls'
@@ -14,7 +15,7 @@ export function RegisterPage() {
   const registerAccount = useRegister()
   const locations = useLocations()
   const [formError, setFormError] = useState('')
-  const { register, handleSubmit, control, setValue, setError, formState: { errors } } = useForm<RegisterFormValues>({
+  const { register, handleSubmit, control, setValue, setError, formState: { errors, isDirty, isSubmitSuccessful } } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: { role: 'farmer', name: '', email: '', phone: '', location_id: 0, password: '', password_confirmation: '' },
   })
@@ -71,6 +72,7 @@ export function RegisterPage() {
         <SubmitButton loading={registerAccount.isPending}>Daftar akun</SubmitButton>
       </form>
       <p className="auth-switch">Sudah memiliki akun? <Link to="/login">Masuk</Link></p>
+      <UnsavedChangesDialog when={isDirty && !isSubmitSuccessful && !registerAccount.isPending} />
     </AuthLayout>
   )
 }

@@ -42,6 +42,9 @@
 * { box-sizing: border-box; }
 html { min-width: 320px; background: var(--canvas); }
 body { margin: 0; min-width: 320px; min-height: 100vh; font-weight: 400; }
+dialog::backdrop { background: rgba(8, 46, 43, .55); }
+dialog[open] { animation: dialog-in 150ms ease-out; }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(8px) scale(.98); } }
 h1, h2, h3, h4, h5, h6 { font-weight: 600; }
 strong, b { font-weight: 700; }
 button, input, select, textarea { font: inherit; }

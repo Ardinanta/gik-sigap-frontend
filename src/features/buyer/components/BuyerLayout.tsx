@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { ConfirmDialog } from '../../../components/ConfirmDialog'
 import { useCurrentUser, useLogout } from '../../auth/hooks/useAuth'
 import { getBuyerPageTitle } from '../navigation'
 import '../buyer.css'
@@ -11,6 +12,7 @@ export function BuyerLayout() {
   const logout = useLogout()
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [logoutOpen, setLogoutOpen] = useState(false)
 
   useEffect(() => {
     if (!sidebarOpen) return
@@ -40,7 +42,10 @@ export function BuyerLayout() {
         isLoggingOut={logout.isPending}
         logoutError={logout.isError}
         onClose={closeSidebar}
-        onLogout={() => logout.mutate()}
+        onLogout={() => {
+          setSidebarOpen(false)
+          setLogoutOpen(true)
+        }}
       />
       <button
         className={`buyer-sidebar-backdrop${sidebarOpen ? ' is-visible' : ''}`}
@@ -55,6 +60,17 @@ export function BuyerLayout() {
           <Outlet />
         </main>
       </div>
+      <ConfirmDialog
+        open={logoutOpen}
+        title="Keluar dari SIGAP?"
+        description="Sesi akun Anda pada perangkat ini akan diakhiri. Anda perlu masuk kembali untuk mengakses layanan SIGAP."
+        confirmLabel="Ya, Keluar"
+        variant="danger"
+        pending={logout.isPending}
+        error={logout.isError ? 'Tidak dapat keluar. Periksa koneksi lalu coba lagi.' : undefined}
+        onCancel={() => setLogoutOpen(false)}
+        onConfirm={() => logout.mutate(undefined, { onSuccess: () => setLogoutOpen(false) })}
+      />
     </div>
   )
 }
