@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
-import sigapLogo from '../../../assets/images/sigap-logo.jpeg'
+import sigapLogo from '../../../assets/images/Logo 1 NoBG.svg'
 
 interface AuthLayoutProps {
   children: ReactNode
