@@ -10,6 +10,7 @@ import {
   BuyerPartnershipsPage,
   BuyerProfilePage,
   BuyerRecommendationsPage,
+  BuyerSupplyDetailPage,
   BuyerSupplyPage,
 } from '../features/buyer'
 
@@ -91,6 +92,7 @@ export default function App() {
             <Route path="dashboard" element={<BuyerDashboardPage />} />
             <Route path="kebutuhan" element={<BuyerDemandsPage />} />
             <Route path="pasokan" element={<BuyerSupplyPage />} />
+            <Route path="pasokan/:harvestPlanId" element={<BuyerSupplyDetailPage />} />
             <Route path="rekomendasi" element={<BuyerRecommendationsPage />} />
             <Route path="kemitraan" element={<BuyerPartnershipsPage />} />
             <Route path="profil" element={<BuyerProfilePage />} />

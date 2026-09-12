@@ -1,10 +1,12 @@
-import { CalendarDays, ChevronLeft, ChevronRight, Fish, LoaderCircle, MapPin, MessageCircle, Search, SlidersHorizontal, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { CalendarDays, ChevronLeft, ChevronRight, MapPin, Search, SlidersHorizontal } from 'lucide-react'
+import { useState } from 'react'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import pondPlaceholder from '../../../assets/images/pond-placeholder.svg'
+import { WhatsAppLink } from '../components/WhatsAppLink'
 import { useBuyerLocations, useFishSizes } from '../hooks/useBuyerDemands'
-import { useCatalog, useCatalogDetail } from '../hooks/useCatalog'
-import type { CatalogFilters, CatalogSupply } from '../types/catalog.types'
+import { useCatalog } from '../hooks/useCatalog'
+import type { CatalogFilters } from '../types/catalog.types'
+import { formatDate, formatPrice, formatVolume } from '../utils/catalogFormatters'
 
 const perPage = 9
 
@@ -24,71 +26,6 @@ function filtersFromParams(params: URLSearchParams): CatalogFilters {
   }
 }
 
-function formatVolume(value: string) {
-  return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(Number(value))
-}
-
-function formatPrice(value: string | null) {
-  if (!value) return 'Hubungi untuk harga'
-  return `${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value))}/kg`
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${value}T00:00:00`))
-}
-
-function WhatsAppLink({ supply, className }: { supply: CatalogSupply; className: string }) {
-  if (!supply.whatsapp_url) {
-    return <span className={`${className} cursor-not-allowed opacity-50`} aria-disabled="true"><MessageCircle size={17} /> Kontak tidak tersedia</span>
-  }
-
-  return <a className={className} href={supply.whatsapp_url} target="_blank" rel="noopener noreferrer"><MessageCircle size={17} /> Hubungi WhatsApp</a>
-}
-
-function SupplyDetailDialog({ id, onClose }: { id: number; onClose: () => void }) {
-  const detail = useCatalogDetail(id)
-  const closeButton = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    closeButton.current?.focus()
-    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && onClose()
-    window.addEventListener('keydown', closeOnEscape)
-    return () => {
-      document.body.style.overflow = previousOverflow
-      window.removeEventListener('keydown', closeOnEscape)
-    }
-  }, [onClose])
-
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/45 p-4" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className="my-auto w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="supply-detail-title">
-        <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4 sm:px-7">
-          <div><p className="text-xs font-bold uppercase tracking-[.14em] text-tide">Detail Pasokan</p><h2 id="supply-detail-title" className="mt-1 text-xl font-bold text-ink">Informasi Rencana Panen</h2></div>
-          <button ref={closeButton} className="grid size-10 place-items-center rounded-lg text-ink-soft hover:bg-panel-alt hover:text-ink" type="button" onClick={onClose} aria-label="Tutup detail"><X size={20} /></button>
-        </div>
-        {detail.isLoading && <div className="flex min-h-72 items-center justify-center gap-2 text-sm text-ink-soft"><LoaderCircle className="animate-spin" size={20} /> Memuat detail...</div>}
-        {detail.isError && <div className="grid min-h-72 place-items-center p-8 text-center text-sm text-danger"><div><p>Detail pasokan gagal dimuat.</p><button className="mt-3 font-bold text-tide underline" type="button" onClick={() => detail.refetch()}>Coba lagi</button></div></div>}
-        {detail.data && (
-          <div className="grid gap-6 p-5 sm:p-7">
-            <div className="grid gap-5 sm:grid-cols-[180px_1fr]">
-              <img className="h-40 w-full rounded-xl object-cover sm:h-full" src={pondPlaceholder} alt="Ilustrasi tambak bandeng" />
-              <div><h3 className="text-lg font-bold text-ink">{detail.data.pond_name}</h3><p className="mt-1 text-sm text-ink-soft">Petambak {detail.data.farmer_name}</p><div className="mt-4 grid gap-2 text-sm text-ink"><p className="flex items-center gap-2"><MapPin size={16} className="text-tide" /> Kec. {detail.data.location.name}</p><p className="flex items-center gap-2"><CalendarDays size={16} className="text-tide" /> {formatDate(detail.data.harvest_date)}</p><p className="flex items-center gap-2"><Fish size={16} className="text-tide" /> Bandeng {detail.data.fish_size.name}</p></div></div>
-            </div>
-            <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {[['Estimasi', detail.data.estimated_volume_kg], ['Dialokasikan', detail.data.allocated_volume_kg], ['Direservasi', detail.data.reserved_volume_kg], ['Tersedia', detail.data.available_volume_kg]].map(([label, value]) => <div className="rounded-xl bg-panel-alt p-3" key={label}><dt className="text-xs text-ink-soft">{label}</dt><dd className="mt-1 font-bold text-ink">{formatVolume(value)} kg</dd></div>)}
-            </dl>
-            <div className="flex flex-col gap-1 rounded-xl border border-line p-4"><span className="text-xs text-ink-soft">Perkiraan harga</span><strong className="text-lg text-tide">{formatPrice(detail.data.asking_price_per_kg)}</strong></div>
-            {detail.data.notes && <div><h4 className="text-sm font-bold text-ink">Catatan Petambak</h4><p className="mt-1 text-sm leading-6 text-ink-soft">{detail.data.notes}</p></div>}
-            <WhatsAppLink supply={detail.data} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-tide px-5 py-2.5 text-sm font-bold !text-white no-underline hover:bg-tide-dark hover:!text-white hover:no-underline" />
-          </div>
-        )}
-      </section>
-    </div>
-  )
-}
-
 export function BuyerSupplyPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const filters = filtersFromParams(searchParams)
@@ -98,7 +35,7 @@ export function BuyerSupplyPage() {
     start_date: searchParams.get('start_date') ?? '',
     end_date: searchParams.get('end_date') ?? '',
   }))
-  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const location = useLocation()
   const catalog = useCatalog(filters)
   const locations = useBuyerLocations()
   const fishSizes = useFishSizes()
@@ -147,17 +84,15 @@ export function BuyerSupplyPage() {
       {catalog.data && catalog.data.data.length > 0 && (
         <div className={`grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 ${catalog.isFetching ? 'opacity-60' : ''}`} aria-busy={catalog.isFetching}>
           {catalog.data.data.map((supply) => (
-            <article className="group overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" key={supply.id}>
+            <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" key={supply.id}>
               <div className="relative"><img className="h-44 w-full object-cover" src={pondPlaceholder} alt="Ilustrasi tambak bandeng" /><span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-success shadow-sm"><i className="size-2 rounded-full bg-success" /> Tersedia</span></div>
-              <div className="grid gap-4 p-5"><div><p className="text-xs font-semibold text-tide">Bandeng {supply.fish_size.name}</p><h2 className="mt-1 text-lg font-bold">{supply.pond_name}</h2><p className="mt-1 text-sm text-ink-soft">Petambak {supply.farmer_name}</p></div><div className="grid grid-cols-2 gap-3 text-sm"><p className="flex items-center gap-2 text-ink-soft"><MapPin size={15} className="text-tide" /> Kec. {supply.location.name}</p><p className="flex items-center gap-2 text-ink-soft"><CalendarDays size={15} className="text-tide" /> {formatDate(supply.harvest_date)}</p></div><div className="flex items-end justify-between gap-4 border-y border-line py-3"><div><span className="block text-xs text-ink-soft">Volume tersedia</span><strong className="text-lg text-ink">{formatVolume(supply.available_volume_kg)} kg</strong></div><div className="text-right"><span className="block text-xs text-ink-soft">Perkiraan harga</span><strong className="text-sm text-tide">{formatPrice(supply.asking_price_per_kg)}</strong></div></div><div className="grid grid-cols-2 gap-2"><button className="min-h-11 rounded-lg border border-line px-3 text-sm font-bold text-ink hover:bg-panel-alt" type="button" onClick={() => setSelectedId(supply.id)}>Lihat Detail</button><WhatsAppLink supply={supply} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-tide px-3 text-center text-sm font-bold !text-white no-underline hover:bg-tide-dark hover:!text-white hover:no-underline" /></div></div>
+              <div className="flex flex-1 flex-col gap-4 p-5"><div><p className="text-xs font-semibold text-tide">Bandeng {supply.fish_size.name}</p><h2 className="mt-1 text-lg font-bold">{supply.pond_name}</h2><p className="mt-1 text-sm text-ink-soft">Petambak {supply.farmer_name}</p></div><div className="grid grid-cols-2 gap-3 text-sm"><p className="flex items-center gap-2 text-ink-soft"><MapPin size={15} className="text-tide" /> Kec. {supply.location.name}</p><p className="flex items-center gap-2 text-ink-soft"><CalendarDays size={15} className="text-tide" /> {formatDate(supply.harvest_date)}</p></div><div className="flex items-end justify-between gap-4 border-y border-line py-3"><div><span className="block text-xs text-ink-soft">Volume tersedia</span><strong className="text-lg text-ink">{formatVolume(supply.available_volume_kg)} kg</strong></div><div className="text-right"><span className="block text-xs text-ink-soft">Perkiraan harga</span><strong className="text-sm text-tide">{formatPrice(supply.asking_price_per_kg)}</strong></div></div><div className="mt-auto grid grid-cols-2 gap-2"><Link className="inline-flex min-h-11 items-center justify-center rounded-lg border border-line px-3 text-sm font-bold text-ink! no-underline hover:bg-panel-alt hover:no-underline" to={`/app/buyer/pasokan/${supply.id}`} state={{ from: `${location.pathname}${location.search}` }}>Lihat Detail</Link><WhatsAppLink supply={supply} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-tide px-3 text-center text-sm font-bold text-white! no-underline hover:bg-tide-dark hover:text-white! hover:no-underline" /></div></div>
             </article>
           ))}
         </div>
       )}
 
       {catalog.data && catalog.data.meta.last_page > 1 && <nav className="flex items-center justify-center gap-3" aria-label="Halaman katalog"><button className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-line bg-white px-3 text-sm font-semibold disabled:opacity-40" type="button" disabled={filters.page <= 1 || catalog.isFetching} onClick={() => updatePage(filters.page - 1)}><ChevronLeft size={16} /> Sebelumnya</button><span className="text-sm text-ink-soft">Halaman <strong className="text-ink">{filters.page}</strong> dari {catalog.data.meta.last_page}</span><button className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-line bg-white px-3 text-sm font-semibold disabled:opacity-40" type="button" disabled={filters.page >= catalog.data.meta.last_page || catalog.isFetching} onClick={() => updatePage(filters.page + 1)}>Berikutnya <ChevronRight size={16} /></button></nav>}
-
-      {selectedId !== null && <SupplyDetailDialog id={selectedId} onClose={() => setSelectedId(null)} />}
     </div>
   )
 }

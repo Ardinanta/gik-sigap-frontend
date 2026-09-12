@@ -28,4 +28,19 @@ export interface CatalogSupply {
   whatsapp_url: string | null
 }
 
+export interface ReservationInput {
+  volume_kg: number
+  notes: string | null
+}
+
+export interface Reservation {
+  id: number
+  harvest_plan: Pick<CatalogSupply, 'id' | 'pond_name'>
+  reserved_volume_kg: string
+  notes: string | null
+  status: 'pending' | 'confirmed' | 'cancelled' | 'expired'
+  expires_at: string | null
+  created_at: string
+}
+
 export type CatalogResponse = PaginatedResponse<CatalogSupply>

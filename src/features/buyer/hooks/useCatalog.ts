@@ -1,6 +1,6 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { catalogApi } from '../api/catalogApi'
-import type { CatalogFilters } from '../types/catalog.types'
+import type { CatalogFilters, ReservationInput } from '../types/catalog.types'
 
 export const catalogKeys = {
   all: ['catalog'] as const,
@@ -21,5 +21,19 @@ export function useCatalogDetail(id: number | null) {
     queryKey: catalogKeys.detail(id ?? 0),
     queryFn: () => catalogApi.detail(id as number),
     enabled: id !== null,
+  })
+}
+
+export function useCreateReservation(id: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: ReservationInput) => catalogApi.reserve(id, payload),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: catalogKeys.all }),
+        queryClient.invalidateQueries({ queryKey: catalogKeys.detail(id) }),
+      ])
+    },
   })
 }
