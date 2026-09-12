@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" role="img" aria-labelledby="title desc">
+  <title id="title">Ilustrasi tambak bandeng</title>
+  <desc id="desc">Petak tambak air payau dengan pematang dan pepohonan di kejauhan.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dff2ed"/><stop offset="1" stop-color="#f7faf7"/></linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6aa9a2"/><stop offset="1" stop-color="#b9d7ce"/></linearGradient>
+  </defs>
+  <rect width="800" height="460" fill="url(#sky)"/>
+  <circle cx="655" cy="92" r="44" fill="#f2cb73" opacity=".85"/>
+  <path d="M0 190C110 155 196 175 290 148c106-30 166 5 255-18 99-25 170-3 255 20v86H0z" fill="#789b72"/>
+  <path d="M0 215h800v245H0z" fill="url(#water)"/>
+  <path d="M0 276 800 218v34L0 322zM0 406l800-102v35L0 452z" fill="#9e8054"/>
+  <path d="M218 203v257h38V198zM555 184l-20 276h39l19-282z" fill="#af9468" opacity=".92"/>
+  <g fill="none" stroke="#e9f4ef" stroke-width="4" opacity=".7">
+    <path d="M286 287c50-14 100-19 149-14"/><path d="M610 257c53-8 101-8 147-2"/><path d="M43 370c54-8 104-8 151-2"/>
+  </g>
+  <g fill="#426b55"><path d="M92 180h9v43h-9z"/><circle cx="96" cy="168" r="23"/><path d="M710 164h9v52h-9z"/><circle cx="714" cy="150" r="27"/></g>
+</svg>
