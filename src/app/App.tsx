@@ -1,20 +1,30 @@
 import { LoaderCircle, LogOut, MapPin, ShieldCheck } from 'lucide-react'
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { ForgotPasswordPage, LoginPage, RegisterPage, ResetPasswordPage } from '../features/auth'
 import { AuthLayout } from '../features/auth/components/AuthLayout'
 import { useCurrentUser, useLogout } from '../features/auth/hooks/useAuth'
-import {
-  BuyerDashboardPage,
-  BuyerDemandsPage,
-  BuyerLayout,
-  BuyerPartnershipsPage,
-  BuyerProfilePage,
-  BuyerRecommendationsPage,
-  BuyerSupplyDetailPage,
-  BuyerSupplyPage,
-} from '../features/buyer'
+import { BuyerLayout } from '../features/buyer/components/BuyerLayout'
+import { FarmerLayout } from '../features/farmer/components/FarmerLayout'
+
+const BuyerDashboardPage = lazy(() => import('../features/buyer/pages/BuyerDashboardPage').then((module) => ({ default: module.BuyerDashboardPage })))
+const PartnershipHandoverPage = lazy(() => import('../features/buyer/pages/PartnershipHandoverPage').then((module) => ({ default: module.PartnershipHandoverPage })))
+const BuyerDemandsPage = lazy(() => import('../features/buyer/pages/BuyerDemandsPage').then((module) => ({ default: module.BuyerDemandsPage })))
+const BuyerPartnershipDetailPage = lazy(() => import('../features/buyer/pages/BuyerPartnershipDetailPage').then((module) => ({ default: module.BuyerPartnershipDetailPage })))
+const BuyerPartnershipsPage = lazy(() => import('../features/buyer/pages/BuyerPartnershipsPage').then((module) => ({ default: module.BuyerPartnershipsPage })))
+const BuyerProfilePage = lazy(() => import('../features/buyer/pages/BuyerProfilePage').then((module) => ({ default: module.BuyerProfilePage })))
+const BuyerRecommendationsPage = lazy(() => import('../features/buyer/pages/BuyerRecommendationsPage').then((module) => ({ default: module.BuyerRecommendationsPage })))
+const BuyerSupplyDetailPage = lazy(() => import('../features/buyer/pages/BuyerSupplyDetailPage').then((module) => ({ default: module.BuyerSupplyDetailPage })))
+const BuyerSupplyPage = lazy(() => import('../features/buyer/pages/BuyerSupplyPage').then((module) => ({ default: module.BuyerSupplyPage })))
+const FarmerDashboardPage = lazy(() => import('../features/farmer/pages/FarmerDashboardPage').then((module) => ({ default: module.FarmerDashboardPage })))
+const FarmerProfilePage = lazy(() => import('../features/farmer/pages/FarmerProfilePage').then((module) => ({ default: module.FarmerProfilePage })))
+const FarmerHarvestPlansPage = lazy(() => import('../features/farmer/pages/FarmerHarvestPlansPage').then((module) => ({ default: module.FarmerHarvestPlansPage })))
+const FarmerEditHarvestPlanPage = lazy(() => import('../features/farmer/pages/FarmerEditHarvestPlanPage').then((module) => ({ default: module.FarmerEditHarvestPlanPage })))
+const FarmerRecommendationsPage = lazy(() => import('../features/farmer/pages/FarmerRecommendationsPage').then((module) => ({ default: module.FarmerRecommendationsPage })))
+const FarmerRiskPage = lazy(() => import('../features/farmer/pages/FarmerRiskPage').then((module) => ({ default: module.FarmerRiskPage })))
+const FarmerPartnershipsPage = lazy(() => import('../features/farmer/pages/FarmerPartnershipsPage').then((module) => ({ default: module.FarmerPartnershipsPage })))
+const FarmerPartnershipDetailPage = lazy(() => import('../features/farmer/pages/FarmerPartnershipDetailPage').then((module) => ({ default: module.FarmerPartnershipDetailPage })))
 
 function LoadingScreen() {
   return <div className="route-loading"><LoaderCircle className="spinner" size={28} /><span>Menyiapkan SIGAP...</span></div>
@@ -40,6 +50,12 @@ function BuyerOnly() {
   return <Outlet />
 }
 
+function FarmerOnly() {
+  const user = useCurrentUser()
+  if (!user.data?.roles.includes('farmer')) return <Navigate to="/app" replace />
+  return <Outlet />
+}
+
 function HomeRedirect() {
   const user = useCurrentUser()
   if (user.isLoading) return <LoadingScreen />
@@ -53,6 +69,9 @@ function AppLanding() {
 
   if (user.data?.roles.includes('buyer')) {
     return <Navigate to="/app/buyer/dashboard" replace />
+  }
+  if (user.data?.roles.includes('farmer')) {
+    return <Navigate to="/app/farmer/dashboard" replace />
   }
 
   const accountRole = user.data?.roles.includes('farmer') ? 'Petambak' : user.data?.roles.includes('admin') ? 'Admin' : 'Pengguna'
@@ -89,6 +108,7 @@ function AppLanding() {
 
 export default function App() {
   return (
+    <Suspense fallback={<LoadingScreen />}>
     <Routes>
       <Route path="/" element={<HomeRedirect />} />
       <Route element={<PublicOnly />}>
@@ -100,6 +120,7 @@ export default function App() {
 
       <Route element={<ProtectedOnly />}>
         <Route path="/app" element={<AppLanding />} />
+        <Route path="/app/kemitraan/:partnershipId/serah-terima" element={<div className="min-h-screen bg-canvas p-4 md:p-8"><PartnershipHandoverPage /></div>} />
         <Route element={<BuyerOnly />}>
           <Route path="/app/buyer" element={<BuyerLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
@@ -109,12 +130,29 @@ export default function App() {
             <Route path="pasokan/:harvestPlanId" element={<BuyerSupplyDetailPage key="supply-detail" />} />
             <Route path="rekomendasi" element={<BuyerRecommendationsPage />} />
             <Route path="kemitraan" element={<BuyerPartnershipsPage />} />
+            <Route path="kemitraan/:partnershipId" element={<BuyerPartnershipDetailPage />} />
+            <Route path="kemitraan/:partnershipId/serah-terima" element={<PartnershipHandoverPage />} />
             <Route path="profil" element={<BuyerProfilePage />} />
+          </Route>
+        </Route>
+        <Route element={<FarmerOnly />}>
+          <Route path="/app/farmer" element={<FarmerLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<FarmerDashboardPage />} />
+            <Route path="rencana-panen" element={<FarmerHarvestPlansPage />} />
+            <Route path="rencana-panen/:harvestPlanId/ubah" element={<FarmerEditHarvestPlanPage />} />
+            <Route path="rekomendasi" element={<FarmerRecommendationsPage />} />
+            <Route path="risiko" element={<FarmerRiskPage />} />
+            <Route path="kemitraan" element={<FarmerPartnershipsPage />} />
+            <Route path="kemitraan/:partnershipId" element={<FarmerPartnershipDetailPage />} />
+            <Route path="kemitraan/:partnershipId/serah-terima" element={<PartnershipHandoverPage />} />
+            <Route path="profil" element={<FarmerProfilePage />} />
           </Route>
         </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   )
 }

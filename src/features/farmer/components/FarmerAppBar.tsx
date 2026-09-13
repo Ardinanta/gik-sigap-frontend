@@ -1,12 +1,12 @@
 import { Menu } from 'lucide-react'
 import { NotificationPopover } from '../../notifications/components/NotificationPopover'
 
-interface BuyerAppBarProps {
+interface FarmerAppBarProps {
   pageTitle: string
   onOpenMenu: () => void
 }
 
-export function BuyerAppBar({ pageTitle, onOpenMenu }: BuyerAppBarProps) {
+export function FarmerAppBar({ pageTitle, onOpenMenu }: FarmerAppBarProps) {
   return (
     <header className="buyer-app-bar">
       <div className="buyer-app-bar-heading">

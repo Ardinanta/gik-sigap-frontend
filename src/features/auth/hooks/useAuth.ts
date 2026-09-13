@@ -10,6 +10,7 @@ export const authKeys = {
 export function useCurrentUser() {
   return useQuery({
     queryKey: authKeys.user,
+    staleTime: 5 * 60_000,
     queryFn: async () => {
       try {
         return await authApi.me()
@@ -41,7 +42,10 @@ export function useLogout() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: authApi.logout,
-    onSuccess: () => queryClient.setQueryData(authKeys.user, null),
+    onSuccess: () => {
+      queryClient.clear()
+      queryClient.setQueryData(authKeys.user, null)
+    },
   })
 }
 

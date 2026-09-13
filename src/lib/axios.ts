@@ -8,10 +8,21 @@ export const apiClient = axios.create({
   withXSRFToken: true,
   headers: {
     Accept: 'application/json',
-    'Content-Type': 'application/json',
   },
 })
 
-export async function ensureCsrfCookie() {
-  await apiClient.get('/sanctum/csrf-cookie')
+let csrfPromise: Promise<void> | null = null
+
+export function ensureCsrfCookie(): Promise<void> {
+  if (!csrfPromise) {
+    csrfPromise = apiClient
+      .get('/sanctum/csrf-cookie')
+      .then(() => undefined)
+      .catch((error) => {
+        // Reset so the next call retries instead of silently succeeding
+        csrfPromise = null
+        throw error
+      })
+  }
+  return csrfPromise
 }

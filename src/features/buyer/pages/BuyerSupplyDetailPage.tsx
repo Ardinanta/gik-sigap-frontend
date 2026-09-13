@@ -5,6 +5,7 @@ import { useForm, useWatch } from 'react-hook-form'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { ConfirmDialog } from '../../../components/ConfirmDialog'
 import { UnsavedChangesDialog } from '../../../components/UnsavedChangesDialog'
+import pondPlaceholder from '../../../assets/images/pond-placeholder.svg'
 import { getApiError } from '../../../lib/utils'
 import { WhatsAppLink } from '../components/WhatsAppLink'
 import { useCatalogDetail, useCreateReservation } from '../hooks/useCatalog'
@@ -82,25 +83,35 @@ export function BuyerSupplyDetailPage() {
   return (
     <div className="buyer-page grid gap-5 text-ink">
       <header className="flex flex-col justify-between gap-3 border-b border-line pb-4 sm:flex-row sm:items-center">
-        <div className="flex min-w-0 items-center gap-3"><Link className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg border border-line bg-white px-3 text-sm font-bold text-ink! no-underline hover:bg-panel-alt hover:no-underline" to={returnTo}><ArrowLeft size={16} /> Kembali</Link><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h1 className="truncate text-xl font-bold sm:text-2xl">Detail Tambak: {supply.pond_name}</h1><span className="inline-flex items-center gap-1.5 rounded-full bg-success-soft px-2.5 py-1 text-xs font-bold text-success"><i className="size-2 rounded-full bg-success" /> Tersedia</span></div></div></div>
+        <div className="flex min-w-0 items-center gap-3"><Link className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg border border-line bg-white px-3 text-sm font-bold text-ink! no-underline hover:bg-panel-alt hover:no-underline" to={returnTo}><ArrowLeft size={16} /> Kembali</Link><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h1 className="buyer-typography-page-title truncate">Detail Tambak: {supply.pond_name}</h1><span className="inline-flex items-center gap-1.5 rounded-full bg-success-soft px-2.5 py-1 text-xs font-bold text-success"><i className="size-2 rounded-full bg-success" /> Tersedia</span></div></div></div>
         <p className="flex shrink-0 items-center gap-1.5 text-sm text-ink-soft"><MapPin size={15} /> {supply.pond_address || `Kec. ${supply.location.name}`}</p>
       </header>
 
       <div className="grid items-start gap-5 lg:grid-cols-2">
-        <section className="rounded-xl border border-line bg-white p-5 shadow-sm sm:p-6" aria-labelledby="supply-info-title">
-          <h2 id="supply-info-title" className="flex items-center gap-2 border-b border-line pb-4 text-sm font-bold text-tide"><Info size={17} /> Informasi Tambak &amp; Pasokan</h2>
-          <dl className="divide-y divide-line text-sm">
-            <div className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink-soft">Nama Petambak</dt><dd className="text-right font-bold">{supply.farmer_name} ({supply.location.name}, Gresik)</dd></div>
-            <div className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink-soft">Tanggal Panen</dt><dd className="text-right font-bold">{formatDate(supply.harvest_date)}</dd></div>
-            <div className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink-soft">Total Estimasi Pasokan</dt><dd className="text-right font-bold">{formatVolume(supply.estimated_volume_kg)} kg <span className="font-normal text-success">(Tersedia {formatVolume(supply.available_volume_kg)} kg)</span></dd></div>
-            <div className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink-soft">Ukuran Bandeng</dt><dd className="text-right font-bold">{supply.fish_size.name}{sizeGuide && ` (${sizeGuide})`}</dd></div>
-            <div className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink-soft">Harga Acuan</dt><dd className="text-right text-lg font-bold text-tide">{formatPrice(supply.asking_price_per_kg)}</dd></div>
-          </dl>
-          {supply.notes && <div className="rounded-lg bg-panel-alt p-4 text-sm leading-6"><strong>Catatan Singkat:</strong> {supply.notes}</div>}
-        </section>
+        <div className="grid gap-5">
+          <figure className="overflow-hidden rounded-xl border border-line bg-white shadow-sm">
+            <img
+              className="aspect-video w-full object-cover"
+              src={supply.photo_url || pondPlaceholder}
+              alt={supply.photo_url ? `Kondisi ${supply.pond_name}` : 'Ilustrasi tambak bandeng'}
+            />
+          </figure>
+
+          <section className="rounded-xl border border-line bg-white p-5 shadow-sm sm:p-6" aria-labelledby="supply-info-title">
+            <h2 id="supply-info-title" className="flex items-center gap-2 border-b border-line pb-4 text-base font-bold text-tide"><Info size={17} /> Informasi Tambak &amp; Pasokan</h2>
+            <dl className="divide-y divide-line text-sm">
+              <div className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink-soft">Nama Petambak</dt><dd className="text-right font-bold">{supply.farmer_name} ({supply.location.name}, Gresik)</dd></div>
+              <div className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink-soft">Tanggal Panen</dt><dd className="text-right font-bold">{formatDate(supply.harvest_date)}</dd></div>
+              <div className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink-soft">Total Estimasi Pasokan</dt><dd className="text-right font-bold">{formatVolume(supply.estimated_volume_kg)} kg <span className="font-normal text-success">(Tersedia {formatVolume(supply.available_volume_kg)} kg)</span></dd></div>
+              <div className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink-soft">Ukuran Bandeng</dt><dd className="text-right font-bold">{supply.fish_size.name}{sizeGuide && ` (${sizeGuide})`}</dd></div>
+              <div className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink-soft">Harga Acuan</dt><dd className="text-right text-lg font-bold text-tide">{formatPrice(supply.asking_price_per_kg)}</dd></div>
+            </dl>
+            {supply.notes && <div className="rounded-lg bg-panel-alt p-4 text-sm leading-6"><strong>Catatan Singkat:</strong> {supply.notes}</div>}
+          </section>
+        </div>
 
         <section className="rounded-xl border border-line bg-white p-5 shadow-sm sm:p-6" aria-labelledby="reservation-form-title">
-          <div className="flex items-center justify-between gap-3 border-b border-line pb-4"><h2 id="reservation-form-title" className="flex items-center gap-2 text-sm font-bold text-tide"><ClipboardList size={17} /> Formulir Reservasi</h2><span className="rounded-md bg-panel-alt px-2 py-1 text-xs text-ink-soft">Tanpa DP Online</span></div>
+          <div className="flex items-center justify-between gap-3 border-b border-line pb-4"><h2 id="reservation-form-title" className="flex items-center gap-2 text-base font-bold text-tide"><ClipboardList size={17} /> Formulir Reservasi</h2><span className="rounded-md bg-panel-alt px-2 py-1 text-xs text-ink-soft">Tanpa DP Online</span></div>
           <form className="mt-5 grid gap-4" onSubmit={onSubmit} noValidate>
             {successMessage && <div className="flex gap-3 rounded-lg bg-success-soft p-4 text-sm text-success" role="status"><CheckCircle2 className="shrink-0" size={19} /><div><strong>{successMessage}</strong>{successExpiry && <p className="mt-1">Berlaku sampai {expiryText(successExpiry)}.</p>}</div></div>}
             {formError && <div className="rounded-lg bg-danger-soft p-4 text-sm text-danger" role="alert">{formError}</div>}

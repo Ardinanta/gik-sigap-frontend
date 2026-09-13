@@ -29,11 +29,6 @@ export function useCreateReservation(id: number) {
 
   return useMutation({
     mutationFn: (payload: ReservationInput) => catalogApi.reserve(id, payload),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: catalogKeys.all }),
-        queryClient.invalidateQueries({ queryKey: catalogKeys.detail(id) }),
-      ])
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: catalogKeys.all }),
   })
 }

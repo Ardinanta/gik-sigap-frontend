@@ -25,6 +25,7 @@ export interface CatalogSupply {
   available_volume_kg: string
   asking_price_per_kg: string | null
   notes: string | null
+  photo_url: string | null
   whatsapp_url: string | null
 }
 

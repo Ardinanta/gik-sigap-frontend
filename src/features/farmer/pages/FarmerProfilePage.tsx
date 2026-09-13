@@ -11,9 +11,9 @@ const initials = (name?: string) => name
   .filter(Boolean)
   .slice(0, 2)
   .map((part) => part[0]?.toUpperCase())
-  .join('') || 'PB'
+  .join('') || 'PT'
 
-export function BuyerProfilePage() {
+export function FarmerProfilePage() {
   const user = useCurrentUser()
 
   if (user.isLoading) {
@@ -21,7 +21,7 @@ export function BuyerProfilePage() {
   }
 
   if (user.isError || !user.data) {
-    return <div role="alert" className="rounded-xl border border-danger/20 bg-danger-soft p-6 text-center text-sm text-danger"><p>Profil tidak dapat dimuat.</p><button type="button" className="mt-3 rounded-lg border border-danger/20 bg-white px-4 py-2 font-semibold transition-colors hover:bg-danger-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger" onClick={() => user.refetch()}>Coba Lagi</button></div>
+    return <div role="alert" className="rounded-xl border border-danger/20 bg-danger-soft p-6 text-center text-sm text-danger"><p>Profil tidak dapat dimuat.</p><button type="button" className="mt-3 rounded-lg border border-danger/20 bg-white px-4 py-2 font-semibold hover:bg-danger-soft" onClick={() => user.refetch()}>Coba Lagi</button></div>
   }
 
   const account = user.data
@@ -30,9 +30,9 @@ export function BuyerProfilePage() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-10 text-ink">
       <header>
-        <span className="text-xs font-semibold uppercase tracking-wider text-tide">Akun Pembeli</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-tide">Akun Petambak</span>
         <h1 className="mt-1 text-2xl font-bold md:text-3xl">Profil Saya</h1>
-        <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-soft">Informasi akun yang digunakan untuk mengelola kebutuhan dan kemitraan di SIGAP.</p>
+        <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-soft">Informasi akun yang digunakan untuk mengelola pasokan dan kemitraan di SIGAP.</p>
       </header>
 
       <section className="overflow-hidden rounded-xl border border-line bg-white shadow-sm">
@@ -44,7 +44,7 @@ export function BuyerProfilePage() {
                 <h2 className="truncate text-xl font-bold text-white md:text-2xl">{account.name}</h2>
                 <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${active ? 'bg-white text-success' : 'bg-danger-soft text-danger'}`}>{active ? <CheckCircle2 size={13} /> : <ShieldCheck size={13} />}{active ? 'Akun Aktif' : account.status}</span>
               </div>
-              <p className="mt-1 text-sm text-white/80">Pembeli Bandeng · Kabupaten Gresik</p>
+              <p className="mt-1 text-sm text-white/80">Petambak Bandeng · Kabupaten Gresik</p>
             </div>
           </div>
         </div>
@@ -63,8 +63,8 @@ export function BuyerProfilePage() {
           <aside className="rounded-xl border border-line bg-canvas p-5">
             <span className="grid size-10 place-items-center rounded-lg bg-success-soft text-tide"><Phone size={18} /></span>
             <h3 className="mt-4 text-sm font-bold">Kontak Kemitraan</h3>
-            <p className="mt-2 text-xs leading-5 text-ink-soft">Nomor WhatsApp akun digunakan agar Petambak dalam kemitraan dapat menghubungi Anda melalui tautan aman.</p>
-            <div className="mt-4 rounded-lg bg-white p-3 text-xs text-ink-soft"><strong className="block text-ink">Privasi tetap terlindungi</strong><span className="mt-1 block leading-5">SIGAP tidak menampilkan nomor mentah pada katalog maupun response kemitraan.</span></div>
+            <p className="mt-2 text-xs leading-5 text-ink-soft">Nomor WhatsApp akun digunakan agar pembeli yang memiliki akses ke kemitraan dapat menghubungi Anda melalui tautan aman.</p>
+            <div className="mt-4 rounded-lg bg-white p-3 text-xs text-ink-soft"><strong className="block text-ink">Privasi tetap terlindungi</strong><span className="mt-1 block leading-5">SIGAP tidak menampilkan nomor mentah pada katalog dan response kemitraan publik.</span></div>
           </aside>
         </div>
       </section>

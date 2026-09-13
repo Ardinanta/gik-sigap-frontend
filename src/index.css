@@ -51,10 +51,21 @@ button, input, select, textarea { font: inherit; }
 label, button { font-weight: 500; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: var(--tide); font-weight: 600; text-decoration: none; }
-a:hover { text-decoration: underline; }
-button { cursor: pointer; }
+a:hover { text-decoration: none; }
+button {
+  cursor: pointer;
+  transition:
+    color 160ms ease-out,
+    background-color 160ms ease-out,
+    border-color 160ms ease-out,
+    box-shadow 160ms ease-out,
+    filter 160ms ease-out,
+    transform 160ms ease-out;
+}
+button:not(:disabled):hover { filter: brightness(.97); transform: translateY(-1px); }
+button:not(:disabled):active { filter: brightness(.94); transform: translateY(0) scale(.98); }
 button:disabled { cursor: not-allowed; opacity: .58; }
-:focus-visible { outline: 2px solid rgba(14, 92, 86, .36); outline-offset: 2px; }
+:focus-visible { outline: 2px solid rgba(14, 92, 86, .5); outline-offset: 2px; }
 
 .auth-shell { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; background: var(--canvas); }
 .site-header { height: 72px; padding: 0 6vw; display: flex; align-items: center; justify-content: space-between; background: var(--panel); border-bottom: 1px solid var(--border); }
@@ -89,7 +100,8 @@ button:disabled { cursor: not-allowed; opacity: .58; }
 .input-wrap .with-action { padding-right: 42px; }
 .input-icon { position: absolute; z-index: 1; left: 12px; top: 50%; display: flex; color: #7b8982; transform: translateY(-50%); pointer-events: none; }
 .input-action { position: absolute; right: 6px; top: 50%; width: 32px; height: 32px; display: grid; place-items: center; transform: translateY(-50%); border: 0; border-radius: 5px; color: var(--text-soft); background: transparent; }
-.input-action:hover { color: var(--tide); background: var(--panel-alt); }
+.input-action:hover:not(:disabled) { color: var(--tide); background: var(--panel-alt); box-shadow: inset 0 0 0 1px var(--border); transform: translateY(-50%) scale(1.04); }
+.input-action:active:not(:disabled) { transform: translateY(-50%) scale(.96); }
 .input-wrap.has-error input, .input-wrap.has-error select { border-color: var(--danger-text); }
 .field-error, .field-helper { margin: 5px 0 0; font-size: 11px; line-height: 1.4; }
 .field-error { color: var(--danger-text); }
@@ -98,12 +110,14 @@ button:disabled { cursor: not-allowed; opacity: .58; }
 .form-options { display: flex; align-items: center; justify-content: space-between; gap: 16px; color: var(--text-soft); font-size: 12px; }
 .check-label { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
 .check-label input { width: 15px; height: 15px; accent-color: var(--tide); }
-.button-primary, .button-secondary { min-height: 42px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 14px; font-size: 13px; font-weight: 600; transition: filter 160ms ease-out, background 160ms ease-out; }
+.button-primary, .button-secondary { min-height: 42px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 14px; font-size: 13px; font-weight: 600; transition: color 160ms ease-out, border-color 160ms ease-out, background 160ms ease-out, box-shadow 160ms ease-out, filter 160ms ease-out, transform 160ms ease-out; }
 .button-primary { border: 1px solid var(--tide); color: white; background: var(--tide); }
-.button-primary:hover { filter: brightness(.94); text-decoration: none; }
+.button-primary:hover:not(:disabled) { background: var(--tide-dark); border-color: var(--tide-dark); box-shadow: 0 5px 14px rgba(8, 46, 43, .18); filter: none; text-decoration: none; }
 .button-secondary { border: 1px solid var(--border); color: var(--text); background: var(--panel-alt); }
-.button-secondary:hover { background: #e6ebe8; }
+.button-secondary:hover:not(:disabled) { border-color: #a9bbb5; background: #e6ebe8; box-shadow: 0 4px 12px rgba(20, 30, 25, .08); }
+.button-primary:active:not(:disabled), .button-secondary:active:not(:disabled) { box-shadow: none; transform: translateY(0) scale(.98); }
 .link-button { width: 100%; }
+.link-button:hover { transform: translateY(-1px); }
 .spinner { animation: spin .75s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -113,12 +127,14 @@ button:disabled { cursor: not-allowed; opacity: .58; }
 .form-alert.error { color: var(--danger-text); background: var(--danger-bg); }
 .form-alert.success { color: var(--success-text); background: var(--success-bg); }
 .form-alert.info { color: #365e59; background: var(--info-bg); }
-.text-button { padding: 0; border: 0; color: var(--tide); background: none; font-weight: 700; text-decoration: underline; }
+.text-button { padding: 2px 4px; border: 0; border-radius: 4px; color: var(--tide); background: none; font-weight: 700; text-decoration: underline; }
+.text-button:hover:not(:disabled) { color: var(--tide-dark); background: var(--success-bg); }
 
 .role-fieldset { margin: 0; padding: 0; border: 0; }
 .role-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.role-card { min-height: 78px; padding: 12px; display: flex; align-items: center; gap: 11px; text-align: left; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--panel); }
-.role-card:hover { border-color: #a9bbb5; background: #fafcfb; }
+.role-card { min-height: 78px; padding: 12px; display: flex; align-items: center; gap: 11px; text-align: left; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--panel); transition: border-color 160ms ease-out, background 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out; }
+.role-card:hover:not(:disabled) { border-color: #8eaaa1; background: #fafcfb; box-shadow: 0 5px 14px rgba(20, 30, 25, .08); transform: translateY(-1px); }
+.role-card:active:not(:disabled) { box-shadow: none; transform: scale(.99); }
 .role-card.selected { border-color: var(--tide); background: #f5faf8; box-shadow: 0 0 0 2px rgba(14, 92, 86, .08); }
 .role-icon { width: 38px; height: 38px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 7px; color: var(--tide); background: var(--success-bg); }
 .role-card strong, .role-card small { display: block; }
