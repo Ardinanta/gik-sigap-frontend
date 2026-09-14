@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseURL = import.meta.env.VITE_API_URL ?? 'https://unsecured-sanitizer-porcupine.ngrok-free.dev/'
+const baseURL = import.meta.env.VITE_API_URL?.trim() || '/'
 
 export const apiClient = axios.create({
   baseURL,
@@ -8,6 +8,7 @@ export const apiClient = axios.create({
   withXSRFToken: true,
   headers: {
     Accept: 'application/json',
+    'ngrok-skip-browser-warning': 'true',
   },
 })
 
