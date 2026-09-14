@@ -1,0 +1,6 @@
+export const formatNumber = (value: string | number) => new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(Number(value))
+export const formatCurrency = (value: string | number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value))
+export const formatDate = (value: string) => new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(`${value}T00:00:00`))
+export const inputClass = 'min-h-10 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink outline-none transition-colors hover:border-[#a9bbb5] focus:border-tide focus:ring-2 focus:ring-tide/10'
+export const buttonPrimary = 'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-tide px-4 text-sm font-semibold text-white! transition-colors hover:bg-tide-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tide disabled:cursor-not-allowed disabled:opacity-50'
+export const buttonSecondary = 'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 text-sm font-semibold text-ink transition-colors hover:border-[#a9bbb5] hover:bg-panel-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tide disabled:cursor-not-allowed disabled:opacity-50'

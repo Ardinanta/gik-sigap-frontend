@@ -43,7 +43,9 @@ export function useLogout() {
   return useMutation({
     mutationFn: authApi.logout,
     onSuccess: () => {
-      queryClient.clear()
+      queryClient.removeQueries({
+        predicate: (query) => query.queryKey[0] !== 'auth',
+      })
       queryClient.setQueryData(authKeys.user, null)
     },
   })

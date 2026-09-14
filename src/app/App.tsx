@@ -7,6 +7,7 @@ import { AuthLayout } from '../features/auth/components/AuthLayout'
 import { useCurrentUser, useLogout } from '../features/auth/hooks/useAuth'
 import { BuyerLayout } from '../features/buyer/components/BuyerLayout'
 import { FarmerLayout } from '../features/farmer/components/FarmerLayout'
+import { AdminLayout } from '../features/admin/components/AdminLayout'
 
 const BuyerDashboardPage = lazy(() => import('../features/buyer/pages/BuyerDashboardPage').then((module) => ({ default: module.BuyerDashboardPage })))
 const PartnershipHandoverPage = lazy(() => import('../features/buyer/pages/PartnershipHandoverPage').then((module) => ({ default: module.PartnershipHandoverPage })))
@@ -25,6 +26,11 @@ const FarmerRecommendationsPage = lazy(() => import('../features/farmer/pages/Fa
 const FarmerRiskPage = lazy(() => import('../features/farmer/pages/FarmerRiskPage').then((module) => ({ default: module.FarmerRiskPage })))
 const FarmerPartnershipsPage = lazy(() => import('../features/farmer/pages/FarmerPartnershipsPage').then((module) => ({ default: module.FarmerPartnershipsPage })))
 const FarmerPartnershipDetailPage = lazy(() => import('../features/farmer/pages/FarmerPartnershipDetailPage').then((module) => ({ default: module.FarmerPartnershipDetailPage })))
+const AdminDashboardPage = lazy(() => import('../features/admin/pages/AdminDashboardPage').then((module) => ({ default: module.AdminDashboardPage })))
+const AdminHarvestPlansPage = lazy(() => import('../features/admin/pages/AdminHarvestPlansPage').then((module) => ({ default: module.AdminHarvestPlansPage })))
+const AdminRisksPage = lazy(() => import('../features/admin/pages/AdminRisksPage').then((module) => ({ default: module.AdminRisksPage })))
+const AdminTransactionsPage = lazy(() => import('../features/admin/pages/AdminTransactionsPage').then((module) => ({ default: module.AdminTransactionsPage })))
+const AdminMasterDataPage = lazy(() => import('../features/admin/pages/AdminMasterDataPage').then((module) => ({ default: module.AdminMasterDataPage })))
 
 function LoadingScreen() {
   return <div className="route-loading"><LoaderCircle className="spinner" size={28} /><span>Menyiapkan SIGAP...</span></div>
@@ -56,11 +62,13 @@ function FarmerOnly() {
   return <Outlet />
 }
 
-function HomeRedirect() {
+function AdminOnly() {
   const user = useCurrentUser()
-  if (user.isLoading) return <LoadingScreen />
-  return <Navigate to={user.data ? '/app' : '/login'} replace />
+  if (!user.data?.roles.includes('admin')) return <Navigate to="/app" replace />
+  return <Outlet />
 }
+
+const LandingPage = lazy(() => import('../features/landing/LandingPage').then(module => ({ default: module.LandingPage })))
 
 function AppLanding() {
   const user = useCurrentUser()
@@ -72,6 +80,9 @@ function AppLanding() {
   }
   if (user.data?.roles.includes('farmer')) {
     return <Navigate to="/app/farmer/dashboard" replace />
+  }
+  if (user.data?.roles.includes('admin')) {
+    return <Navigate to="/app/admin/dashboard" replace />
   }
 
   const accountRole = user.data?.roles.includes('farmer') ? 'Petambak' : user.data?.roles.includes('admin') ? 'Admin' : 'Pengguna'
@@ -110,7 +121,7 @@ export default function App() {
   return (
     <Suspense fallback={<LoadingScreen />}>
     <Routes>
-      <Route path="/" element={<HomeRedirect />} />
+      <Route path="/" element={<LandingPage />} />
       <Route element={<PublicOnly />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -121,6 +132,16 @@ export default function App() {
       <Route element={<ProtectedOnly />}>
         <Route path="/app" element={<AppLanding />} />
         <Route path="/app/kemitraan/:partnershipId/serah-terima" element={<div className="min-h-screen bg-canvas p-4 md:p-8"><PartnershipHandoverPage /></div>} />
+        <Route element={<AdminOnly />}>
+          <Route path="/app/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="rencana-panen" element={<AdminHarvestPlansPage />} />
+            <Route path="risiko" element={<AdminRisksPage />} />
+            <Route path="transaksi" element={<AdminTransactionsPage />} />
+            <Route path="master-data" element={<AdminMasterDataPage />} />
+          </Route>
+        </Route>
         <Route element={<BuyerOnly />}>
           <Route path="/app/buyer" element={<BuyerLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
