@@ -10,9 +10,12 @@
   top: 0;
   z-index: 30;
   height: 100vh;
-  padding: 22px 14px 14px;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: 22px 14px max(14px, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   color: #cfe0dc;
   background: var(--tide-dark);
 }
@@ -28,13 +31,13 @@
 .buyer-sidebar-close:hover:not(:disabled) { background: rgba(255, 255, 255, .12); transform: scale(1.04); }
 .buyer-sidebar-close:active:not(:disabled) { transform: scale(.96); }
 
-.buyer-navigation { margin-top: 27px; display: flex; flex-direction: column; gap: 5px; }
+.buyer-navigation { min-height: 0; margin-top: 27px; display: flex; flex: 1 1 auto; flex-direction: column; gap: 5px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .buyer-nav-link { min-height: 40px; padding: 9px 10px; display: flex; align-items: center; gap: 11px; border-radius: 6px; color: #cfe0dc; font-size: 14px; font-weight: 500; transition: color 160ms ease-out, background 160ms ease-out; }
 .buyer-nav-link:hover { color: white; background: rgba(255, 255, 255, .08); text-decoration: none; }
 .buyer-nav-link.active { color: white; background: var(--tide); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); font-weight: 650; }
 .buyer-nav-link:focus-visible, .buyer-logout-button:focus-visible, .buyer-sidebar-close:focus-visible { outline-color: rgba(255, 255, 255, .68); }
 
-.buyer-account-area { margin-top: auto; }
+.buyer-account-area { flex: 0 0 auto; margin-top: 12px; }
 .buyer-logout-error { margin: 0 4px 8px; color: #ffd5cd; font-size: 12px; }
 .buyer-account-card { min-width: 0; padding: 11px 10px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255, 255, 255, .08); border-radius: 7px; background: rgba(255, 255, 255, .055); }
 .buyer-account-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; }
@@ -176,7 +179,7 @@
 
   body.buyer-drawer-open { overflow: hidden; }
   .buyer-shell { display: block; }
-  .buyer-sidebar { position: fixed; left: 0; width: min(290px, 84vw); padding: 18px 14px 14px; transform: translateX(-101%); transition: transform 180ms ease-out; box-shadow: 8px 0 24px rgba(0, 0, 0, .14); }
+  .buyer-sidebar { position: fixed; inset-block: 0; left: 0; width: min(290px, 84vw); padding: max(18px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom)); transform: translateX(-101%); transition: transform 180ms ease-out; box-shadow: 8px 0 24px rgba(0, 0, 0, .14); }
   .buyer-sidebar.is-open { transform: translateX(0); }
   .buyer-sidebar-close, .buyer-menu-button { display: grid; }
   .buyer-sidebar-backdrop { position: fixed; inset: 0; z-index: 25; display: block; visibility: hidden; border: 0; background: rgba(8, 30, 28, .44); opacity: 0; transition: opacity 180ms ease-out, visibility 180ms ease-out; }
